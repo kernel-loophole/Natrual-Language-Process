@@ -2,7 +2,7 @@ import os
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
 import numpy as np
-imdb_dir = '/Users/fchollet/Downloads/aclImdb'
+imdb_dir = '/home/tayyab/Desktop/aclImdb'
 train_dir = os.path.join(imdb_dir, 'train')
 labels = []
 texts = []
@@ -17,3 +17,5 @@ for label_type in ['neg', 'pos']:
             labels.append(0)
         else:
             labels.append(1)
+# print(labels)
+# print(dir_name)
