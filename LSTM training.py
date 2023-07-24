@@ -2,8 +2,10 @@ import glob
 import os
 from random import shuffle
 import numpy as np
-from keras.models import Sequential
-from keras.layers import Dense, Dropout, Embedding, Flatten, LSTM
+# from keras.models import Sequential
+# from keras.layers import Dense, Dropout, Embedding, Flatten, LSTM
+
+
 def pre_process_data(filepath):
   positive_path = os.path.join(filepath, 'pos')
   negative_path = os.path.join(filepath, 'neg')
@@ -21,21 +23,27 @@ def pre_process_data(filepath):
       dataset.append((neg_label, f.read()))
       shuffle(dataset)
   return dataset
+
+
 def collect_expected(dataset):
   expected = []
   for sample in dataset:
     expected.append(sample[0])
   return expected
+
+
 def avg_len(data):
   total_len = 0
   for sample in data:
     total_len += len(sample[1])
-  return total_len/len(data)
+  return total_len / len(data)
+
+
 def clean_data(data):
   new_data = []
   VALID = 'abcdefghijklmnopqrstuvwxyz0123456789"\'?!.,:; '
   for sample in data:
-    
+
     new_sample = []
     for char in sample[1].lower():
       if char in VALID:
@@ -45,6 +53,7 @@ def clean_data(data):
     new_data.append(new_sample)
   return new_data
 
+
 def char_pad_trunc(data, maxlen=1000):
   new_dataset = []
   for sample in data:
@@ -52,11 +61,12 @@ def char_pad_trunc(data, maxlen=1000):
       new_data = sample[:maxlen]
     elif len(sample) < maxlen:
       pads = maxlen - len(sample)
-      new_data = sample + ['PAD'] * pads  
+      new_data = sample + ['PAD'] * pads
     else:
       new_data = sample
     new_dataset.append(new_data)
   return new_dataset
+
 
 def create_dicts(data):
   chars = set()
@@ -65,6 +75,8 @@ def create_dicts(data):
     char_indices = dict((c, i) for i, c in enumerate(chars))
     indices_char = dict((i, c) for i, c in enumerate(chars))
   return char_indices, indices_char
+
+
 def onehot_encode(dataset, char_indices, maxlen=1500):
   X = np.zeros((len(dataset), maxlen, len(char_indices.keys())))
   for i, sentence in enumerate(dataset):
@@ -72,9 +84,10 @@ def onehot_encode(dataset, char_indices, maxlen=1500):
       X[i, t, char_indices[char]] = 1
   return X
 
+
 dataset = pre_process_data('dataset/train')
 expected = collect_expected(dataset)
-listified_data=clean_data(dataset)
+listified_data = clean_data(dataset)
 # data_set_dict=create_dicts(listed_data)
 common_length_data = char_pad_trunc(listified_data, maxlen=1000)
 char_indices, indices_char = create_dicts(common_length_data)
@@ -89,8 +102,16 @@ vector of length equal to the number of characters
 np array of shape (samples, tokens, encoding length)"""
 # print(encoded_data.shape)
 
-split_point = int(len(encoded_data)*.8)
+split_point = int(len(encoded_data) * .8)
 x_train = encoded_data[:split_point]
 y_train = expected[:split_point]
 x_test = encoded_data[split_point:]
 y_test = expected[split_point:]
+x_train_file = 'x_train.npy'
+y_train_file = 'y_train.npy'
+x_test_file = 'x_test.npy'
+y_test_file = 'y_test.npy'
+np.save(x_train_file, x_train)
+np.save(y_train_file, y_train)
+np.save(x_test_file, x_test)
+np.save(y_test_file, y_test)
